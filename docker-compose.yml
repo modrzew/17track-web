@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CARRIERS_URL: ${CARRIERS_URL:-https://res.17track.net/asset/carrier/info/apicarrier.all.json}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - 17TRACK_TOKEN=${17TRACK_TOKEN}
+    restart: unless-stopped

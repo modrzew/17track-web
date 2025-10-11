@@ -10,9 +10,11 @@ This is a Next.js 15 web application for tracking parcels using the 17Track API.
 
 ```bash
 # Development server (uses Turbopack)
+# Note: Automatically downloads carriers.json before starting
 npm run dev
 
 # Production build
+# Note: Automatically downloads carriers.json before building
 npm run build
 
 # Start production server
@@ -20,6 +22,28 @@ npm start
 
 # Lint the codebase
 npm run lint
+
+# Type check
+npm run type-check
+
+# Format code
+npm run format
+
+# Check code formatting
+npm run format:check
+```
+
+## Docker
+
+```bash
+# Build and run with docker-compose
+docker-compose up -d
+
+# Build Docker image manually
+docker build -t 17track-web .
+
+# Run with environment variables
+docker run -p 3000:3000 -e 17TRACK_TOKEN=your_token 17track-web
 ```
 
 ## Architecture
@@ -94,12 +118,16 @@ Key types are centralized in `src/lib/types.ts`:
 
 ## Environment Variables
 
-Required in `.env.local`:
+Required in `.env.local` (see `.env.example` for template):
 ```bash
+# Required: 17Track API token (get from https://api.17track.net/)
 17TRACK_TOKEN=your_api_token_here
+
+# Optional: Carriers data URL (defaults to 17Track's CDN)
+CARRIERS_URL=https://res.17track.net/asset/carrier/info/apicarrier.all.json
 ```
 
-Get your token from: https://api.17track.net/
+For Docker deployments, set `17TRACK_TOKEN` as an environment variable. The `CARRIERS_URL` is only used at build time.
 
 ## Path Aliases
 
@@ -112,8 +140,12 @@ Example: `import { usePackages } from '@/hooks/usePackages';`
 - **Turbopack**: All build commands use `--turbopack` flag
 - **Strict TypeScript**: `strict: true` in tsconfig.json - all code must be properly typed
 - **IndexedDB**: Only available client-side; check `typeof window !== 'undefined'`
-- **Carrier data**: Static JSON file at `src/lib/carriers.json` with 1000+ carriers
+- **Carrier data**: Downloaded at build/dev time via `scripts/download-carriers.js` from 17Track's CDN (not committed to repo)
+  - File: `src/lib/carriers.json` (auto-generated, gitignored)
+  - Contains 1000+ carrier definitions
+  - Automatically refreshed on each build/dev start
 - **React 19**: Uses latest React features; ensure compatibility when adding dependencies
+- **Standalone build**: `output: 'standalone'` in next.config.ts for optimal Docker images
 
 ## Styling Conventions
 

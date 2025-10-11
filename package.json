@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/download-carriers.js",
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/download-carriers.js",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
