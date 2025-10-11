@@ -116,17 +116,15 @@ export function PackageList({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <StatusIcon status={pkg.status} />
-                          <span className="text-sm font-medium text-gray-900 truncate">
+                          <span className="text-base font-bold text-gray-900 truncate">
                             {pkg.title || carrier?._name || 'Unknown Carrier'}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 font-mono truncate">
+                        <p className="text-xs text-gray-500 font-mono truncate mb-1">
                           {pkg.trackingNumber}
                         </p>
                         {pkg.lastEvent && (
-                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                            {pkg.lastEvent.a}
-                          </p>
+                          <p className="text-xs text-gray-600 line-clamp-2">{pkg.lastEvent.a}</p>
                         )}
                       </div>
                       <button
@@ -152,7 +150,7 @@ export function PackageList({
 }
 
 function StatusIcon({ status }: { status: PackageStatus }) {
-  const className = 'w-4 h-4';
+  const className = 'w-5 h-5';
 
   switch (status) {
     case PackageStatus.Delivered:

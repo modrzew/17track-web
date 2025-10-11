@@ -62,13 +62,18 @@ export default function Home() {
     await deletePackage(trackingNumber);
   };
 
+  const handleCloseDetails = () => {
+    window.history.pushState(null, '', '/');
+    setSelectedPackage(null);
+  };
+
   return (
-    <main className="flex h-screen bg-white">
+    <main className="flex h-screen bg-white overflow-hidden">
       {/* Desktop: sidebar + main panel */}
-      {/* Mobile: stack layout */}
-      <div className="flex flex-col md:flex-row w-full">
+      {/* Mobile: bottom sheet when package selected */}
+      <div className="flex flex-col md:flex-row w-full h-full">
         {/* Sidebar / List Panel */}
-        <div className="w-full md:w-80 lg:w-96 border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-80 lg:w-96 md:border-r md:border-gray-200 flex flex-col h-full">
           <PackageList
             packages={packages}
             selectedPackage={selectedPackage}
@@ -82,8 +87,8 @@ export default function Home() {
           />
         </div>
 
-        {/* Main Content / Details Panel */}
-        <div className="flex-1 flex flex-col">
+        {/* Desktop: Main Content / Details Panel */}
+        <div className="hidden md:flex md:flex-1 flex-col">
           <PackageDetails
             details={details}
             loading={detailsLoading}
@@ -98,6 +103,33 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* Mobile: Bottom Sheet with Overlay */}
+      {selectedPackage && (
+        <div className="md:hidden fixed inset-0 z-50">
+          {/* Backdrop Overlay */}
+          <div
+            className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm"
+            onClick={handleCloseDetails}
+          />
+
+          {/* Bottom Sheet */}
+          <div className="absolute inset-x-0 bottom-0 top-16 bg-white rounded-t-2xl shadow-2xl flex flex-col">
+            <PackageDetails
+              details={details}
+              loading={detailsLoading}
+              error={detailsError}
+              refreshing={detailsRefreshing}
+              onRefresh={refreshDetails}
+              onUpdateTitle={title => {
+                if (selectedPackage) {
+                  updatePackageTitle(selectedPackage, title);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Add Package Dialog */}
       {showAddDialog && (
