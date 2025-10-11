@@ -43,7 +43,7 @@ docker-compose up -d
 docker build -t 17track-web .
 
 # Run with environment variables
-docker run -p 3000:3000 -e 17TRACK_TOKEN=your_token 17track-web
+docker run -p 3000:3000 -e SEVENTEENTRACK_TOKEN=your_token 17track-web
 ```
 
 ## Architecture
@@ -106,7 +106,7 @@ src/
 - `GET /api/packages/[trackingNumber]` → proxies to `POST /track/v2.4/gettrackinfo`
 - `DELETE /api/packages/[trackingNumber]` → proxies to `POST /track/v2.4/deletetrack`
 
-All API routes handle authentication via `17TRACK_TOKEN` environment variable.
+All API routes handle authentication via `SEVENTEENTRACK_TOKEN` environment variable.
 
 ### Type System
 
@@ -121,13 +121,13 @@ Key types are centralized in `src/lib/types.ts`:
 Required in `.env.local` (see `.env.example` for template):
 ```bash
 # Required: 17Track API token (get from https://api.17track.net/)
-17TRACK_TOKEN=your_api_token_here
+SEVENTEENTRACK_TOKEN=your_api_token_here
 
 # Optional: Carriers data URL (defaults to 17Track's CDN)
 CARRIERS_URL=https://res.17track.net/asset/carrier/info/apicarrier.all.json
 ```
 
-For Docker deployments, set `17TRACK_TOKEN` as an environment variable. The `CARRIERS_URL` is only used at build time.
+For Docker deployments, set `SEVENTEENTRACK_TOKEN` as an environment variable. The `CARRIERS_URL` is only used at build time.
 
 ## Path Aliases
 

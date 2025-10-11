@@ -47,6 +47,6 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Runtime environment variables (set via docker run or docker-compose)
-# 17TRACK_TOKEN - required at runtime
+# SEVENTEENTRACK_TOKEN - required at runtime
 
 CMD ["node", "server.js"]

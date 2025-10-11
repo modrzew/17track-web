@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE_URL = 'https://api.17track.net';
 const API_VERSION = 'v2.4';
-const API_TOKEN = process.env['17TRACK_TOKEN'];
+const API_TOKEN = process.env.SEVENTEENTRACK_TOKEN;
 
 // GET /api/packages - List packages
 export async function GET(request: NextRequest) {
