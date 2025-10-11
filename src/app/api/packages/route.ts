@@ -40,10 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching packages:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch packages' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch packages' }, { status: 500 });
   }
 }
 
@@ -86,9 +83,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error registering package:', error);
-    return NextResponse.json(
-      { error: 'Failed to register package' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to register package' }, { status: 500 });
   }
 }

@@ -64,10 +64,7 @@ class Track17ApiError extends Error {
 }
 
 class Track17Api {
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     return rateLimiter.execute(async () => {
       const response = await fetch(endpoint, {
         ...options,
@@ -87,33 +84,22 @@ class Track17Api {
       const result: ApiResponse<T> = await response.json();
 
       if (result.code !== 0) {
-        throw new Track17ApiError(
-          result.code,
-          result.msg || 'API request failed',
-          result.data
-        );
+        throw new Track17ApiError(result.code, result.msg || 'API request failed', result.data);
       }
 
       return result;
     });
   }
 
-  async registerTracking(
-    request: RegisterTrackingRequest
-  ): Promise<RegisterTrackingResponse> {
-    const response = await this.request<RegisterTrackingResponse>(
-      '/api/packages',
-      {
-        method: 'POST',
-        body: JSON.stringify(request),
-      }
-    );
+  async registerTracking(request: RegisterTrackingRequest): Promise<RegisterTrackingResponse> {
+    const response = await this.request<RegisterTrackingResponse>('/api/packages', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
     return response.data;
   }
 
-  async getTrackList(
-    request: GetTrackListRequest = {}
-  ): Promise<GetTrackListResponse> {
+  async getTrackList(request: GetTrackListRequest = {}): Promise<GetTrackListResponse> {
     const params = new URLSearchParams();
     if (request.page) params.set('page', request.page.toString());
     if (request.page_size) params.set('page_size', request.page_size.toString());
@@ -148,23 +134,22 @@ class Track17Api {
 
     // Delete one at a time
     for (const trackingNumber of trackingNumbers) {
-      await this.request(
-        `/api/packages/${encodeURIComponent(trackingNumber)}`,
-        { method: 'DELETE' }
-      );
+      await this.request(`/api/packages/${encodeURIComponent(trackingNumber)}`, {
+        method: 'DELETE',
+      });
     }
   }
 
   // Helper to convert package_status string to enum
   static parsePackageStatus(status: string): PackageStatus {
     const statusMap: Record<string, PackageStatus> = {
-      'NotFound': PackageStatus.NotFound,
-      'InTransit': PackageStatus.InTransit,
-      'PickUp': PackageStatus.PickUp,
-      'Undelivered': PackageStatus.Undelivered,
-      'Delivered': PackageStatus.Delivered,
-      'Alert': PackageStatus.Alert,
-      'Expired': PackageStatus.Expired,
+      NotFound: PackageStatus.NotFound,
+      InTransit: PackageStatus.InTransit,
+      PickUp: PackageStatus.PickUp,
+      Undelivered: PackageStatus.Undelivered,
+      Delivered: PackageStatus.Delivered,
+      Alert: PackageStatus.Alert,
+      Expired: PackageStatus.Expired,
     };
     return statusMap[status] || PackageStatus.NotFound;
   }
@@ -178,19 +163,19 @@ class Track17Api {
       title: item.tag || undefined,
       createdAt: item.register_time || new Date().toISOString(),
       updatedAt: item.track_time || new Date().toISOString(),
-      lastEvent: item.latest_event_info ? {
-        a: item.latest_event_info,
-        c: '',
-        d: item.latest_event_time ? new Date(item.latest_event_time).getTime().toString() : '',
-        z: 0,
-      } : undefined,
+      lastEvent: item.latest_event_info
+        ? {
+            a: item.latest_event_info,
+            c: '',
+            d: item.latest_event_time ? new Date(item.latest_event_time).getTime().toString() : '',
+            z: 0,
+          }
+        : undefined,
     };
   }
 
   // Helper method to convert API response to PackageDetails (from /gettrackinfo)
-  static convertToPackageDetails(
-    trackInfo: GetTrackInfoResponse['accepted'][0]
-  ): PackageDetails {
+  static convertToPackageDetails(trackInfo: GetTrackInfoResponse['accepted'][0]): PackageDetails {
     // Extract tracking events from the nested structure
     const events: TrackingEvent[] = [];
 
@@ -200,7 +185,9 @@ class Track17Api {
           for (const event of provider.events) {
             // Use time_utc or time_iso, convert to Unix timestamp (seconds)
             const timeStr = event.time_utc || event.time_iso;
-            const timestamp = timeStr ? Math.floor(new Date(timeStr).getTime() / 1000).toString() : '';
+            const timestamp = timeStr
+              ? Math.floor(new Date(timeStr).getTime() / 1000).toString()
+              : '';
 
             events.push({
               a: event.description || '',

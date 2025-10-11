@@ -40,9 +40,7 @@ export function usePackages() {
             const freshPackages: Package[] = response.accepted.map(item => {
               const pkg = Track17Api.convertTrackListItemToPackage(item);
               // Try to preserve user-defined title and createdAt from cache
-              const cached = cachedPackages.find(
-                p => p.trackingNumber === pkg.trackingNumber
-              );
+              const cached = cachedPackages.find(p => p.trackingNumber === pkg.trackingNumber);
               if (cached && !pkg.title) {
                 pkg.title = cached.title;
               }
@@ -63,11 +61,12 @@ export function usePackages() {
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Track17ApiError
-        ? `API Error (${err.code}): ${err.message}`
-        : err instanceof Error
-        ? err.message
-        : 'Failed to load packages';
+      const errorMessage =
+        err instanceof Track17ApiError
+          ? `API Error (${err.code}): ${err.message}`
+          : err instanceof Error
+            ? err.message
+            : 'Failed to load packages';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -80,38 +79,38 @@ export function usePackages() {
     await loadPackages(false, true); // Force refresh
   }, [loadPackages]);
 
-  const addPackage = useCallback(async (
-    trackingNumber: string,
-    carrierCode: number,
-    title?: string
-  ) => {
-    try {
-      setError(null);
+  const addPackage = useCallback(
+    async (trackingNumber: string, carrierCode: number, title?: string) => {
+      try {
+        setError(null);
 
-      // Register with API
-      const response = await track17Api.registerTracking({
-        number: trackingNumber,
-        carrier: carrierCode,
-        tag: title,
-      });
+        // Register with API
+        const response = await track17Api.registerTracking({
+          number: trackingNumber,
+          carrier: carrierCode,
+          tag: title,
+        });
 
-      if (response.rejected.length > 0) {
-        const rejected = response.rejected[0];
-        throw new Error(rejected.error.message);
+        if (response.rejected.length > 0) {
+          const rejected = response.rejected[0];
+          throw new Error(rejected.error.message);
+        }
+
+        // Fetch fresh data to update the list (force refresh)
+        await loadPackages(false, true);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Track17ApiError
+            ? `Failed to add package: ${err.message}`
+            : err instanceof Error
+              ? err.message
+              : 'Failed to add package';
+        setError(errorMessage);
+        throw err;
       }
-
-      // Fetch fresh data to update the list (force refresh)
-      await loadPackages(false, true);
-    } catch (err) {
-      const errorMessage = err instanceof Track17ApiError
-        ? `Failed to add package: ${err.message}`
-        : err instanceof Error
-        ? err.message
-        : 'Failed to add package';
-      setError(errorMessage);
-      throw err;
-    }
-  }, [loadPackages]);
+    },
+    [loadPackages]
+  );
 
   const deletePackage = useCallback(async (trackingNumber: string) => {
     try {
@@ -126,20 +125,18 @@ export function usePackages() {
       // Update local state
       setPackages(prev => prev.filter(p => p.trackingNumber !== trackingNumber));
     } catch (err) {
-      const errorMessage = err instanceof Track17ApiError
-        ? `Failed to delete package: ${err.message}`
-        : err instanceof Error
-        ? err.message
-        : 'Failed to delete package';
+      const errorMessage =
+        err instanceof Track17ApiError
+          ? `Failed to delete package: ${err.message}`
+          : err instanceof Error
+            ? err.message
+            : 'Failed to delete package';
       setError(errorMessage);
       throw err;
     }
   }, []);
 
-  const updatePackageTitle = useCallback(async (
-    trackingNumber: string,
-    title: string
-  ) => {
+  const updatePackageTitle = useCallback(async (trackingNumber: string, title: string) => {
     try {
       setError(null);
 
@@ -155,9 +152,7 @@ export function usePackages() {
         )
       );
     } catch (err) {
-      const errorMessage = err instanceof Error
-        ? err.message
-        : 'Failed to update package';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update package';
       setError(errorMessage);
       throw err;
     }

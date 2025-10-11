@@ -90,7 +90,7 @@ export default function Home() {
             error={detailsError}
             refreshing={detailsRefreshing}
             onRefresh={refreshDetails}
-            onUpdateTitle={(title) => {
+            onUpdateTitle={title => {
               if (selectedPackage) {
                 updatePackageTitle(selectedPackage, title);
               }

@@ -31,7 +31,7 @@ class PackageStorage {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create packages store
@@ -104,10 +104,7 @@ class PackageStorage {
     await this.init();
     if (!this.db) return;
 
-    const transaction = this.db.transaction(
-      [PACKAGES_STORE, PACKAGE_DETAILS_STORE],
-      'readwrite'
-    );
+    const transaction = this.db.transaction([PACKAGES_STORE, PACKAGE_DETAILS_STORE], 'readwrite');
 
     transaction.objectStore(PACKAGES_STORE).delete(trackingNumber);
     transaction.objectStore(PACKAGE_DETAILS_STORE).delete(trackingNumber);
@@ -122,10 +119,7 @@ class PackageStorage {
     await this.init();
     if (!this.db) return;
 
-    const transaction = this.db.transaction(
-      [PACKAGE_DETAILS_STORE],
-      'readwrite'
-    );
+    const transaction = this.db.transaction([PACKAGE_DETAILS_STORE], 'readwrite');
     const store = transaction.objectStore(PACKAGE_DETAILS_STORE);
     store.put(details);
 
@@ -179,10 +173,7 @@ class PackageStorage {
     await this.init();
     if (!this.db) return;
 
-    const transaction = this.db.transaction(
-      [PACKAGES_STORE, PACKAGE_DETAILS_STORE],
-      'readwrite'
-    );
+    const transaction = this.db.transaction([PACKAGES_STORE, PACKAGE_DETAILS_STORE], 'readwrite');
 
     transaction.objectStore(PACKAGES_STORE).clear();
     transaction.objectStore(PACKAGE_DETAILS_STORE).clear();

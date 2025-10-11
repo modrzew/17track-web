@@ -100,7 +100,7 @@ export function PackageList({
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {packages.map((pkg) => {
+            {packages.map(pkg => {
               const carrier = getCarrierById(pkg.carrierCode);
               const isSelected = selectedPackage === pkg.trackingNumber;
 
@@ -130,7 +130,7 @@ export function PackageList({
                         )}
                       </div>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           onDeletePackage(pkg.trackingNumber);
                         }}

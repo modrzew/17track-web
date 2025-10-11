@@ -83,11 +83,12 @@ export function usePackageDetails(trackingNumber: string | null) {
         // Check if effect is still active
         if (!isActive) return;
 
-        const errorMessage = err instanceof Track17ApiError
-          ? `API Error (${err.code}): ${err.message}`
-          : err instanceof Error
-          ? err.message
-          : 'Failed to load package details';
+        const errorMessage =
+          err instanceof Track17ApiError
+            ? `API Error (${err.code}): ${err.message}`
+            : err instanceof Error
+              ? err.message
+              : 'Failed to load package details';
         setError(errorMessage);
       } finally {
         if (isActive) {

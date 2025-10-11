@@ -28,11 +28,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
     setError(null);
 
     try {
-      await onAdd(
-        trackingNumber.trim(),
-        selectedCarrier.key,
-        title.trim() || undefined
-      );
+      await onAdd(trackingNumber.trim(), selectedCarrier.key, title.trim() || undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
       setLoading(false);
@@ -58,14 +54,17 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
           <div className="space-y-4">
             {/* Tracking Number */}
             <div>
-              <label htmlFor="tracking-number" className="block text-sm font-medium text-gray-900 mb-1">
+              <label
+                htmlFor="tracking-number"
+                className="block text-sm font-medium text-gray-900 mb-1"
+              >
                 Tracking Number
               </label>
               <input
                 id="tracking-number"
                 type="text"
                 value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
+                onChange={e => setTrackingNumber(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Enter tracking number"
                 required
@@ -81,7 +80,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 id="title"
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="e.g., New shoes, Birthday gift"
               />
@@ -89,18 +88,12 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
 
             {/* Carrier Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">
-                Carrier
-              </label>
+              <label className="block text-sm font-medium text-gray-900 mb-1">Carrier</label>
               {selectedCarrier ? (
                 <div className="flex items-center justify-between p-3 border border-gray-300 rounded-lg">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {selectedCarrier._name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {selectedCarrier._country_iso}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900">{selectedCarrier._name}</p>
+                    <p className="text-xs text-gray-500">{selectedCarrier._country_iso}</p>
                   </div>
                   <button
                     type="button"
@@ -116,7 +109,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                     <input
                       type="text"
                       value={carrierSearch}
-                      onChange={(e) => setCarrierSearch(e.target.value)}
+                      onChange={e => setCarrierSearch(e.target.value)}
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                       placeholder="Search carriers..."
                       autoFocus
@@ -125,7 +118,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                   </div>
                   {searchResults.length > 0 && (
                     <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
-                      {searchResults.map((carrier) => (
+                      {searchResults.map(carrier => (
                         <button
                           key={carrier.key}
                           type="button"
@@ -136,12 +129,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                           }}
                           className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         >
-                          <p className="text-sm font-medium text-gray-900">
-                            {carrier._name}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {carrier._country_iso}
-                          </p>
+                          <p className="text-sm font-medium text-gray-900">{carrier._name}</p>
+                          <p className="text-xs text-gray-500">{carrier._country_iso}</p>
                         </button>
                       ))}
                     </div>
@@ -158,19 +147,15 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 <div className="space-y-2">
                   <p className="text-xs text-gray-500 mb-2">Popular carriers:</p>
                   <div className="grid grid-cols-1 gap-2">
-                    {popularCarriers.map((carrier) => (
+                    {popularCarriers.map(carrier => (
                       <button
                         key={carrier.key}
                         type="button"
                         onClick={() => setSelectedCarrier(carrier)}
                         className="text-left px-3 py-2 border border-gray-200 rounded-lg hover:border-gray-900 hover:bg-gray-50"
                       >
-                        <p className="text-sm font-medium text-gray-900">
-                          {carrier._name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {carrier._country_iso}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{carrier._name}</p>
+                        <p className="text-xs text-gray-500">{carrier._country_iso}</p>
                       </button>
                     ))}
                   </div>

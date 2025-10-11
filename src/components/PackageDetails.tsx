@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import type { PackageDetails as PackageDetailsType } from '@/lib/types';
 import { useCarriers } from '@/hooks/useCarriers';
-import {
-  RefreshIcon,
-  PencilIcon,
-  ExclamationCircleIcon,
-  SpinnerIcon,
-  PackageIcon,
-} from './icons';
+import { RefreshIcon, PencilIcon, ExclamationCircleIcon, SpinnerIcon, PackageIcon } from './icons';
 
 interface PackageDetailsProps {
   details: PackageDetailsType | null;
@@ -84,9 +78,9 @@ export function PackageDetails({
                 <input
                   type="text"
                   value={titleInput}
-                  onChange={(e) => setTitleInput(e.target.value)}
+                  onChange={e => setTitleInput(e.target.value)}
                   onBlur={handleSaveTitle}
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter') handleSaveTitle();
                     if (e.key === 'Escape') setEditingTitle(false);
                   }}
@@ -111,12 +105,8 @@ export function PackageDetails({
                 </button>
               </div>
             )}
-            <p className="text-sm text-gray-500 font-mono mt-1">
-              {details.trackingNumber}
-            </p>
-            {carrier && (
-              <p className="text-sm text-gray-600 mt-1">{carrier._name}</p>
-            )}
+            <p className="text-sm text-gray-500 font-mono mt-1">{details.trackingNumber}</p>
+            {carrier && <p className="text-sm text-gray-600 mt-1">{carrier._name}</p>}
           </div>
           <button
             onClick={onRefresh}
@@ -131,9 +121,7 @@ export function PackageDetails({
 
       {/* Tracking History */}
       <div className="flex-1 overflow-y-auto p-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">
-          Tracking History
-        </h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Tracking History</h3>
         {details.trackingHistory.length === 0 ? (
           <p className="text-sm text-gray-500">No tracking events yet</p>
         ) : (
@@ -147,9 +135,7 @@ export function PackageDetails({
                 <li key={uniqueKey} className="mb-8 ml-6">
                   <span
                     className={`absolute flex items-center justify-center w-3 h-3 rounded-full -left-1.5 ${
-                      isLatest
-                        ? 'bg-gray-900'
-                        : 'bg-gray-300'
+                      isLatest ? 'bg-gray-900' : 'bg-gray-300'
                     }`}
                   />
                   <div>
@@ -157,9 +143,7 @@ export function PackageDetails({
                       {date.toLocaleDateString()} {date.toLocaleTimeString()}
                     </time>
                     <p className="text-sm text-gray-900">{event.a}</p>
-                    {event.c && (
-                      <p className="text-xs text-gray-500 mt-1">{event.c}</p>
-                    )}
+                    {event.c && <p className="text-xs text-gray-500 mt-1">{event.c}</p>}
                   </div>
                 </li>
               );
