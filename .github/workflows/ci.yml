@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download carriers data
-        run: node scripts/download-carriers.js
-
       - name: Run ESLint
         run: npm run lint
 

@@ -140,10 +140,11 @@ Example: `import { usePackages } from '@/hooks/usePackages';`
 - **Turbopack**: All build commands use `--turbopack` flag
 - **Strict TypeScript**: `strict: true` in tsconfig.json - all code must be properly typed
 - **IndexedDB**: Only available client-side; check `typeof window !== 'undefined'`
-- **Carrier data**: Downloaded at build/dev time via `scripts/download-carriers.js` from 17Track's CDN (not committed to repo)
-  - File: `src/lib/carriers.json` (auto-generated, gitignored)
-  - Contains 1000+ carrier definitions
-  - Automatically refreshed on each build/dev start
+- **Carrier data**: Managed via `src/lib/carriers.json`
+  - Stub file (empty array) committed to repo for type checking
+  - Auto-populated with 1000+ carriers via `scripts/download-carriers.js` during dev/build (predev/prebuild hooks)
+  - Downloads from 17Track's CDN (configurable via `CARRIERS_URL` env var)
+  - App gracefully handles empty carriers array (e.g., during CI or before first download)
 - **React 19**: Uses latest React features; ensure compatibility when adding dependencies
 - **Standalone build**: `output: 'standalone'` in next.config.ts for optimal Docker images
 
