@@ -36,6 +36,47 @@ export async function GET(
   }
 }
 
+// PATCH /api/packages/[trackingNumber] - Update package info (e.g., tag)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ trackingNumber: string }> }
+) {
+  try {
+    const { trackingNumber } = await params;
+    const body = await request.json();
+
+    const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/changeinfo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        '17token': API_TOKEN || '',
+      },
+      body: JSON.stringify([
+        {
+          number: trackingNumber,
+          carrier: body.carrier,
+          items: {
+            tag: body.tag,
+          },
+        },
+      ]),
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: `HTTP ${response.status}: ${response.statusText}` },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error updating package info:', error);
+    return NextResponse.json({ error: 'Failed to update package info' }, { status: 500 });
+  }
+}
+
 // DELETE /api/packages/[trackingNumber] - Delete package
 export async function DELETE(
   request: NextRequest,

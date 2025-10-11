@@ -6,6 +6,7 @@ import type {
   GetTrackListRequest,
   GetTrackListResponse,
   GetTrackInfoResponse,
+  ChangeInfoResponse,
   TrackListItem,
   TrackingEvent,
   Package,
@@ -138,6 +139,24 @@ class Track17Api {
         method: 'DELETE',
       });
     }
+  }
+
+  async changePackageInfo(
+    trackingNumber: string,
+    carrier: number,
+    updates: { tag?: string }
+  ): Promise<ChangeInfoResponse> {
+    const response = await this.request<ChangeInfoResponse>(
+      `/api/packages/${encodeURIComponent(trackingNumber)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          carrier,
+          tag: updates.tag,
+        }),
+      }
+    );
+    return response.data;
   }
 
   // Helper to convert package_status string to enum

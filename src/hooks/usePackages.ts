@@ -140,8 +140,27 @@ export function usePackages() {
     try {
       setError(null);
 
-      // Update in cache
+      // Get the current package to get carrier code
+      const currentPackage = await packageStorage.getPackage(trackingNumber);
+      if (!currentPackage) {
+        throw new Error('Package not found');
+      }
+
+      // Update on 17Track API
+      await track17Api.changePackageInfo(trackingNumber, currentPackage.carrierCode, {
+        tag: title,
+      });
+
+      // Update in both caches (list and details)
       await packageStorage.updatePackage(trackingNumber, { title });
+
+      // Also update package details if it exists
+      try {
+        await packageStorage.updatePackageDetails(trackingNumber, { title });
+      } catch (detailsErr) {
+        // Details might not exist yet, that's okay
+        console.debug('Package details not yet cached:', detailsErr);
+      }
 
       // Update local state
       setPackages(prev =>
@@ -152,7 +171,12 @@ export function usePackages() {
         )
       );
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update package';
+      const errorMessage =
+        err instanceof Track17ApiError
+          ? `Failed to update package: ${err.message}`
+          : err instanceof Error
+            ? err.message
+            : 'Failed to update package';
       setError(errorMessage);
       throw err;
     }

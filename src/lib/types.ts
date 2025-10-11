@@ -116,6 +116,28 @@ export interface ChangeCarrierRequest {
   carrier: number;
 }
 
+export interface ChangeInfoRequest {
+  number: string;
+  carrier: number;
+  items: {
+    tag?: string;
+  };
+}
+
+export interface ChangeInfoResponse {
+  accepted: Array<{
+    number: string;
+    carrier: number;
+  }>;
+  rejected: Array<{
+    number: string;
+    error: {
+      code: number;
+      message: string;
+    };
+  }>;
+}
+
 // API Response types
 export interface ApiResponse<T = unknown> {
   code: number;

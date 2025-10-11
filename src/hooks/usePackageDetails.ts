@@ -141,11 +141,19 @@ export function usePackageDetails(trackingNumber: string | null) {
     }
   }, [trackingNumber]);
 
+  const updateTitle = useCallback((title: string) => {
+    setDetails(prev => {
+      if (!prev) return prev;
+      return { ...prev, title, updatedAt: new Date().toISOString() };
+    });
+  }, []);
+
   return {
     details,
     loading,
     error,
     refreshing,
     refresh,
+    updateTitle,
   };
 }

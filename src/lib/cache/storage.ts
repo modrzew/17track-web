@@ -169,6 +169,35 @@ class PackageStorage {
     });
   }
 
+  async updatePackageDetails(
+    trackingNumber: string,
+    updates: Partial<PackageDetails>
+  ): Promise<void> {
+    await this.init();
+    if (!this.db) return;
+
+    const transaction = this.db.transaction([PACKAGE_DETAILS_STORE], 'readwrite');
+    const store = transaction.objectStore(PACKAGE_DETAILS_STORE);
+
+    const getRequest = store.get(trackingNumber);
+
+    return new Promise((resolve, reject) => {
+      getRequest.onsuccess = () => {
+        const existing = getRequest.result;
+        if (existing) {
+          const updated = { ...existing, ...updates, updatedAt: new Date().toISOString() };
+          const putRequest = store.put(updated);
+
+          putRequest.onsuccess = () => resolve();
+          putRequest.onerror = () => reject(putRequest.error);
+        } else {
+          reject(new Error('Package details not found'));
+        }
+      };
+      getRequest.onerror = () => reject(getRequest.error);
+    });
+  }
+
   async clear(): Promise<void> {
     await this.init();
     if (!this.db) return;

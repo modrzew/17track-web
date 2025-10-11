@@ -45,6 +45,7 @@ export default function Home() {
     error: detailsError,
     refreshing: detailsRefreshing,
     refresh: refreshDetails,
+    updateTitle: updateDetailsTitle,
   } = usePackageDetails(selectedPackage);
 
   const handleSelectPackage = (trackingNumber: string) => {
@@ -98,6 +99,7 @@ export default function Home() {
             onUpdateTitle={title => {
               if (selectedPackage) {
                 updatePackageTitle(selectedPackage, title);
+                updateDetailsTitle(title);
               }
             }}
           />
@@ -124,6 +126,7 @@ export default function Home() {
               onUpdateTitle={title => {
                 if (selectedPackage) {
                   updatePackageTitle(selectedPackage, title);
+                  updateDetailsTitle(title);
                 }
               }}
             />
