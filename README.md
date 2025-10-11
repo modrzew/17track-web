@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 17track-web
 
-## Getting Started
+Web interface for tracking parcels using the 17Track API.
 
-First, run the development server:
+## Requirements
+
+- Node.js 20+
+- 17Track API token (get from https://api.17track.net/)
+
+## Setup
+
+Create `.env.local` with your API token:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+SEVENTEENTRACK_TOKEN=your_api_token_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+```bash
+npm run dev         # Start development server on http://localhost:3000
+npm run type-check  # Check TypeScript types
+npm run lint        # Run linter
+npm run format      # Format code
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build  # Build for production
+npm start      # Start production server
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Docker
 
-## Deploy on Vercel
+```bash
+# Using docker-compose
+docker-compose up -d
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Manual build and run
+docker build -t 17track-web .
+docker run -p 3000:3000 -e SEVENTEENTRACK_TOKEN=your_token 17track-web
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+- Next.js 15 with App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- IndexedDB for client-side caching
+
+## How it works
+
+The application proxies requests to the 17Track API through Next.js API routes to keep your API token server-side. Package data is cached in IndexedDB for 30 minutes to reduce API calls.
