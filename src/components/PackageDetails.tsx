@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import type { PackageDetails as PackageDetailsType } from '@/lib/types';
 import { useCarriers } from '@/hooks/useCarriers';
-import { RefreshIcon, PencilIcon, ExclamationCircleIcon, SpinnerIcon, PackageIcon, CopyIcon } from './icons';
+import {
+  RefreshIcon,
+  PencilIcon,
+  ExclamationCircleIcon,
+  SpinnerIcon,
+  PackageIcon,
+  CopyIcon,
+} from './icons';
 
 interface PackageDetailsProps {
   details: PackageDetailsType | null;
