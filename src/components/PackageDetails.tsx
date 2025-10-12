@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { PackageDetails as PackageDetailsType } from '@/lib/types';
 import { useCarriers } from '@/hooks/useCarriers';
-import { RefreshIcon, PencilIcon, ExclamationCircleIcon, SpinnerIcon, PackageIcon } from './icons';
+import { RefreshIcon, PencilIcon, ExclamationCircleIcon, SpinnerIcon, PackageIcon, CopyIcon } from './icons';
 
 interface PackageDetailsProps {
   details: PackageDetailsType | null;
@@ -23,6 +23,7 @@ export function PackageDetails({
   const { getCarrierById } = useCarriers();
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState('');
+  const [copied, setCopied] = useState(false);
 
   if (!details && !loading && !error) {
     return (
@@ -67,6 +68,18 @@ export function PackageDetails({
     setEditingTitle(false);
   };
 
+  const handleCopyTrackingNumber = async () => {
+    if (!details) return;
+
+    try {
+      await navigator.clipboard.writeText(details.trackingNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy tracking number:', err);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
@@ -105,7 +118,16 @@ export function PackageDetails({
                 </button>
               </div>
             )}
-            <p className="text-sm text-gray-500 font-mono mt-1">{details.trackingNumber}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-gray-500 font-mono">{details.trackingNumber}</p>
+              <button
+                onClick={handleCopyTrackingNumber}
+                className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded"
+                title={copied ? 'Copied!' : 'Copy tracking number'}
+              >
+                <CopyIcon className={`w-4 h-4 ${copied ? 'text-green-600' : ''}`} />
+              </button>
+            </div>
             {carrier && <p className="text-sm text-gray-600 mt-1">{carrier._name}</p>}
           </div>
           <button
