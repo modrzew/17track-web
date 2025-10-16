@@ -148,6 +148,13 @@ export function usePackageDetails(trackingNumber: string | null) {
     });
   }, []);
 
+  const updateCarrier = useCallback((carrierCode: number) => {
+    setDetails(prev => {
+      if (!prev) return prev;
+      return { ...prev, carrierCode, updatedAt: new Date().toISOString() };
+    });
+  }, []);
+
   return {
     details,
     loading,
@@ -155,5 +162,6 @@ export function usePackageDetails(trackingNumber: string | null) {
     refreshing,
     refresh,
     updateTitle,
+    updateCarrier,
   };
 }

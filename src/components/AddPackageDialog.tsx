@@ -65,7 +65,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 type="text"
                 value={trackingNumber}
                 onChange={e => setTrackingNumber(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Enter tracking number"
                 required
               />
@@ -81,7 +81,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="e.g., New shoes, Birthday gift"
               />
             </div>
@@ -110,7 +110,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                       type="text"
                       value={carrierSearch}
                       onChange={e => setCarrierSearch(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                      className="w-full pl-10 pr-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                       placeholder="Search carriers..."
                       autoFocus
                     />

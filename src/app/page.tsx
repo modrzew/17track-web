@@ -7,16 +7,23 @@ import { PackageList } from '@/components/PackageList';
 import { PackageDetails } from '@/components/PackageDetails';
 import { AddPackageDialog } from '@/components/AddPackageDialog';
 
-export default function Home() {
-  // Get initial tracking number from URL on mount
-  const getTrackingNumberFromUrl = () => {
-    if (typeof window === 'undefined') return null;
-    const path = window.location.pathname;
-    return path === '/' ? null : path.slice(1);
-  };
+// Helper to get tracking number from URL path
+function getTrackingNumberFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const path = window.location.pathname;
+  return path === '/' ? null : path.slice(1);
+}
 
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(getTrackingNumberFromUrl);
+export default function Home() {
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Set initial package from URL after mount (client-side only)
+  useEffect(() => {
+    setSelectedPackage(getTrackingNumberFromUrl());
+    setMounted(true);
+  }, []);
 
   // Listen to browser back/forward navigation
   useEffect(() => {
@@ -37,6 +44,7 @@ export default function Home() {
     addPackage,
     deletePackage,
     updatePackageTitle,
+    updatePackageCarrier,
   } = usePackages();
 
   const {
@@ -46,6 +54,7 @@ export default function Home() {
     refreshing: detailsRefreshing,
     refresh: refreshDetails,
     updateTitle: updateDetailsTitle,
+    updateCarrier: updateDetailsCarrier,
   } = usePackageDetails(selectedPackage);
 
   const handleSelectPackage = (trackingNumber: string) => {
@@ -102,12 +111,18 @@ export default function Home() {
                 updateDetailsTitle(title);
               }
             }}
+            onUpdateCarrier={carrierCode => {
+              if (selectedPackage) {
+                updatePackageCarrier(selectedPackage, carrierCode);
+                updateDetailsCarrier(carrierCode);
+              }
+            }}
           />
         </div>
       </div>
 
       {/* Mobile: Bottom Sheet with Overlay */}
-      {selectedPackage && (
+      {mounted && selectedPackage && (
         <div className="md:hidden fixed inset-0 z-50">
           {/* Backdrop Overlay */}
           <div
@@ -127,6 +142,12 @@ export default function Home() {
                 if (selectedPackage) {
                   updatePackageTitle(selectedPackage, title);
                   updateDetailsTitle(title);
+                }
+              }}
+              onUpdateCarrier={carrierCode => {
+                if (selectedPackage) {
+                  updatePackageCarrier(selectedPackage, carrierCode);
+                  updateDetailsCarrier(carrierCode);
                 }
               }}
             />

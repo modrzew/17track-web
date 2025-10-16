@@ -182,6 +182,44 @@ export function usePackages() {
     }
   }, []);
 
+  const updatePackageCarrier = useCallback(async (trackingNumber: string, carrierCode: number) => {
+    try {
+      setError(null);
+
+      // Update on 17Track API
+      await track17Api.changeCarrier(trackingNumber, carrierCode);
+
+      // Update in both caches (list and details)
+      await packageStorage.updatePackage(trackingNumber, { carrierCode });
+
+      // Also update package details if it exists
+      try {
+        await packageStorage.updatePackageDetails(trackingNumber, { carrierCode });
+      } catch (detailsErr) {
+        // Details might not exist yet, that's okay
+        console.debug('Package details not yet cached:', detailsErr);
+      }
+
+      // Update local state
+      setPackages(prev =>
+        prev.map(p =>
+          p.trackingNumber === trackingNumber
+            ? { ...p, carrierCode, updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
+    } catch (err) {
+      const errorMessage =
+        err instanceof Track17ApiError
+          ? `Failed to update carrier: ${err.message}`
+          : err instanceof Error
+            ? err.message
+            : 'Failed to update carrier';
+      setError(errorMessage);
+      throw err;
+    }
+  }, []);
+
   useEffect(() => {
     loadPackages();
   }, [loadPackages]);
@@ -195,6 +233,7 @@ export function usePackages() {
     addPackage,
     deletePackage,
     updatePackageTitle,
+    updatePackageCarrier,
   };
 }
 

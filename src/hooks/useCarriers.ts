@@ -39,7 +39,6 @@ export function useCarriers() {
       3011, // China Post
       7041, // DHL
       6051, // La Poste (France)
-      7041, // Deutsche Post
       11031, // Royal Mail (UK)
       16071, // USPS
       19131, // Singapore Post

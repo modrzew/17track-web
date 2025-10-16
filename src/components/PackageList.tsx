@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Package } from '@/lib/types';
 import { PackageStatus } from '@/lib/types';
 import { useCarriers } from '@/hooks/useCarriers';
@@ -11,6 +12,8 @@ import {
   ClockIcon,
   ExclamationCircleIcon,
   SpinnerIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from './icons';
 
 interface PackageListProps {
@@ -37,6 +40,18 @@ export function PackageList({
   refreshing,
 }: PackageListProps) {
   const { getCarrierById } = useCarriers();
+  const [showDelivered, setShowDelivered] = useState(false);
+
+  // Categorize packages into sections
+  const categorizedPackages = {
+    active: packages.filter(
+      pkg => pkg.lastEvent && pkg.status !== PackageStatus.Delivered
+    ),
+    inactive: packages.filter(
+      pkg => !pkg.lastEvent && pkg.status !== PackageStatus.Delivered
+    ),
+    delivered: packages.filter(pkg => pkg.status === PackageStatus.Delivered),
+  };
 
   if (loading) {
     return (
@@ -100,52 +115,156 @@ export function PackageList({
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {packages.map(pkg => {
-              const carrier = getCarrierById(pkg.carrierCode);
-              const isSelected = selectedPackage === pkg.trackingNumber;
+            {/* Active packages */}
+            {categorizedPackages.active.map(pkg => (
+              <PackageItem
+                key={pkg.trackingNumber}
+                pkg={pkg}
+                isSelected={selectedPackage === pkg.trackingNumber}
+                onSelectPackage={onSelectPackage}
+                onDeletePackage={onDeletePackage}
+                getCarrierById={getCarrierById}
+              />
+            ))}
 
-              return (
-                <li key={pkg.trackingNumber}>
-                  <div
-                    onClick={() => onSelectPackage(pkg.trackingNumber)}
-                    className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                      isSelected ? 'bg-gray-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <StatusIcon status={pkg.status} />
-                          <span className="text-base font-bold text-gray-900 truncate">
-                            {pkg.title || carrier?._name || 'Unknown Carrier'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 font-mono truncate mb-1">
-                          {pkg.trackingNumber}
-                        </p>
-                        {pkg.lastEvent && (
-                          <p className="text-xs text-gray-600 line-clamp-2">{pkg.lastEvent.a}</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          onDeletePackage(pkg.trackingNumber);
-                        }}
-                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
-                        title="Delete package"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+            {/* Inactive section divider */}
+            {categorizedPackages.inactive.length > 0 && (
+              <SectionDivider label="No updates / Status unknown" />
+            )}
+
+            {/* Inactive packages */}
+            {categorizedPackages.inactive.map(pkg => (
+              <PackageItem
+                key={pkg.trackingNumber}
+                pkg={pkg}
+                isSelected={selectedPackage === pkg.trackingNumber}
+                onSelectPackage={onSelectPackage}
+                onDeletePackage={onDeletePackage}
+                getCarrierById={getCarrierById}
+              />
+            ))}
+
+            {/* Delivered section toggle divider */}
+            {categorizedPackages.delivered.length > 0 && (
+              <ToggleDivider
+                label="Delivered"
+                count={categorizedPackages.delivered.length}
+                isOpen={showDelivered}
+                onToggle={() => setShowDelivered(!showDelivered)}
+              />
+            )}
+
+            {/* Delivered packages (collapsible) */}
+            {showDelivered &&
+              categorizedPackages.delivered.map(pkg => (
+                <PackageItem
+                  key={pkg.trackingNumber}
+                  pkg={pkg}
+                  isSelected={selectedPackage === pkg.trackingNumber}
+                  onSelectPackage={onSelectPackage}
+                  onDeletePackage={onDeletePackage}
+                  getCarrierById={getCarrierById}
+                />
+              ))}
           </ul>
         )}
       </div>
     </>
+  );
+}
+
+// Section divider component (static)
+function SectionDivider({ label }: { label: string }) {
+  return (
+    <li className="bg-gray-50 border-t border-b border-gray-200">
+      <div className="py-2 px-4">
+        <p className="text-xs font-medium text-gray-500 text-center">{label}</p>
+      </div>
+    </li>
+  );
+}
+
+// Toggle divider component (interactive)
+function ToggleDivider({
+  label,
+  count,
+  isOpen,
+  onToggle,
+}: {
+  label: string;
+  count: number;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <li className="bg-gray-50 border-t border-b border-gray-200">
+      <button
+        onClick={onToggle}
+        className="w-full py-2 px-4 hover:bg-gray-100 transition-colors"
+      >
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-xs font-medium text-gray-500">
+            {isOpen ? 'Hide' : 'Show'} {label} ({count})
+          </p>
+          {isOpen ? (
+            <ChevronUpIcon className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+          )}
+        </div>
+      </button>
+    </li>
+  );
+}
+
+// Package item component
+function PackageItem({
+  pkg,
+  isSelected,
+  onSelectPackage,
+  onDeletePackage,
+  getCarrierById,
+}: {
+  pkg: Package;
+  isSelected: boolean;
+  onSelectPackage: (trackingNumber: string) => void;
+  onDeletePackage: (trackingNumber: string) => void;
+  getCarrierById: (id: number) => { _name: string } | undefined;
+}) {
+  const carrier = getCarrierById(pkg.carrierCode);
+
+  return (
+    <li>
+      <div
+        onClick={() => onSelectPackage(pkg.trackingNumber)}
+        className={`w-full text-left p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+          isSelected ? 'bg-gray-50' : ''
+        }`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <StatusIcon status={pkg.status} />
+              <span className="text-base font-bold text-gray-900 truncate">
+                {pkg.title || carrier?._name || 'Unknown Carrier'}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 font-mono truncate mb-1">{pkg.trackingNumber}</p>
+            {pkg.lastEvent && <p className="text-xs text-gray-600 line-clamp-2">{pkg.lastEvent.a}</p>}
+          </div>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onDeletePackage(pkg.trackingNumber);
+            }}
+            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+            title="Delete package"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </li>
   );
 }
 
