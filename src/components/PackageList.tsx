@@ -44,12 +44,8 @@ export function PackageList({
 
   // Categorize packages into sections
   const categorizedPackages = {
-    active: packages.filter(
-      pkg => pkg.lastEvent && pkg.status !== PackageStatus.Delivered
-    ),
-    inactive: packages.filter(
-      pkg => !pkg.lastEvent && pkg.status !== PackageStatus.Delivered
-    ),
+    active: packages.filter(pkg => pkg.lastEvent && pkg.status !== PackageStatus.Delivered),
+    inactive: packages.filter(pkg => !pkg.lastEvent && pkg.status !== PackageStatus.Delivered),
     delivered: packages.filter(pkg => pkg.status === PackageStatus.Delivered),
   };
 
@@ -198,10 +194,7 @@ function ToggleDivider({
 }) {
   return (
     <li className="bg-gray-50 border-t border-b border-gray-200">
-      <button
-        onClick={onToggle}
-        className="w-full py-2 px-4 hover:bg-gray-100 transition-colors"
-      >
+      <button onClick={onToggle} className="w-full py-2 px-4 hover:bg-gray-100 transition-colors">
         <div className="flex items-center justify-center gap-2">
           <p className="text-xs font-medium text-gray-500">
             {isOpen ? 'Hide' : 'Show'} {label} ({count})
@@ -250,7 +243,9 @@ function PackageItem({
               </span>
             </div>
             <p className="text-xs text-gray-500 font-mono truncate mb-1">{pkg.trackingNumber}</p>
-            {pkg.lastEvent && <p className="text-xs text-gray-600 line-clamp-2">{pkg.lastEvent.a}</p>}
+            {pkg.lastEvent && (
+              <p className="text-xs text-gray-600 line-clamp-2">{pkg.lastEvent.a}</p>
+            )}
           </div>
           <button
             onClick={e => {
