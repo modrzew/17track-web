@@ -40,7 +40,7 @@ export function usePackageDetails(trackingNumber: string | null) {
         }
 
         // 2. Check if cache is fresh (< 30 minutes old)
-        const cacheFresh = isCacheFresh(cached?.updatedAt);
+        const cacheFresh = isCacheFresh(cached?.lastFetchedAt);
 
         // 3. Only fetch from API if cache is stale or force refresh
         if (!cacheFresh || forceRefresh || !cached) {
@@ -144,14 +144,14 @@ export function usePackageDetails(trackingNumber: string | null) {
   const updateTitle = useCallback((title: string) => {
     setDetails(prev => {
       if (!prev) return prev;
-      return { ...prev, title, updatedAt: new Date().toISOString() };
+      return { ...prev, title };
     });
   }, []);
 
   const updateCarrier = useCallback((carrierCode: number) => {
     setDetails(prev => {
       if (!prev) return prev;
-      return { ...prev, carrierCode, updatedAt: new Date().toISOString() };
+      return { ...prev, carrierCode };
     });
   }, []);
 

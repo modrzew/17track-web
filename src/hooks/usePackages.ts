@@ -166,7 +166,7 @@ export function usePackages() {
       setPackages(prev =>
         prev.map(p =>
           p.trackingNumber === trackingNumber
-            ? { ...p, title, updatedAt: new Date().toISOString() }
+            ? { ...p, title }
             : p
         )
       );
@@ -204,7 +204,7 @@ export function usePackages() {
       setPackages(prev =>
         prev.map(p =>
           p.trackingNumber === trackingNumber
-            ? { ...p, carrierCode, updatedAt: new Date().toISOString() }
+            ? { ...p, carrierCode }
             : p
         )
       );

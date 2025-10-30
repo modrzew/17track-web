@@ -188,13 +188,15 @@ class Track17Api {
 
   // Helper method to convert TrackListItem (from /gettracklist) to Package
   static convertTrackListItemToPackage(item: TrackListItem): Package {
+    const now = new Date().toISOString();
     return {
       trackingNumber: item.number,
       carrierCode: item.carrier,
       status: this.parsePackageStatus(item.package_status),
       title: item.tag || undefined,
-      createdAt: item.register_time || new Date().toISOString(),
-      updatedAt: item.track_time || new Date().toISOString(),
+      createdAt: item.register_time || now,
+      updatedAt: item.track_time || now, // When 17Track last pulled data from carrier
+      lastFetchedAt: now, // When WE fetched this data from API
       lastEvent: item.latest_event_info
         ? {
             a: item.latest_event_info,
@@ -246,13 +248,15 @@ class Track17Api {
       });
     }
 
+    const now = new Date().toISOString();
     return {
       trackingNumber: trackInfo.number,
       carrierCode: trackInfo.carrier,
       status: this.parsePackageStatus(trackInfo.package_status || 'NotFound'),
       title: trackInfo.tag || undefined,
-      createdAt: trackInfo.register_time || new Date().toISOString(),
-      updatedAt: trackInfo.track_time || new Date().toISOString(),
+      createdAt: trackInfo.register_time || now,
+      updatedAt: trackInfo.track_time || now, // When 17Track last pulled data from carrier
+      lastFetchedAt: now, // When WE fetched this data from API
       lastEvent: events[0],
       trackingHistory: events,
     };
