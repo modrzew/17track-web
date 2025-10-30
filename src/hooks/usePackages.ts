@@ -164,11 +164,7 @@ export function usePackages() {
 
       // Update local state
       setPackages(prev =>
-        prev.map(p =>
-          p.trackingNumber === trackingNumber
-            ? { ...p, title }
-            : p
-        )
+        prev.map(p => (p.trackingNumber === trackingNumber ? { ...p, title } : p))
       );
     } catch (err) {
       const errorMessage =
@@ -202,11 +198,7 @@ export function usePackages() {
 
       // Update local state
       setPackages(prev =>
-        prev.map(p =>
-          p.trackingNumber === trackingNumber
-            ? { ...p, carrierCode }
-            : p
-        )
+        prev.map(p => (p.trackingNumber === trackingNumber ? { ...p, carrierCode } : p))
       );
     } catch (err) {
       const errorMessage =
