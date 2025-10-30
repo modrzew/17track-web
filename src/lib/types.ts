@@ -75,8 +75,9 @@ export interface Package {
   carrierCode: number;
   status: PackageStatus;
   title?: string; // User-defined title
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string; // ISO date string - when package was registered
+  updatedAt: string; // ISO date string - when 17Track last pulled data from carrier (track_time)
+  lastFetchedAt: string; // ISO date string - when WE last fetched this data (for cache expiry)
   lastEvent?: TrackingEvent;
   destination?: string;
   origin?: string;

@@ -3,15 +3,15 @@ export const CACHE_TTL = 30 * 60 * 1000;
 
 /**
  * Check if cached data is still fresh (within TTL)
- * @param updatedAt ISO date string of when data was last updated
+ * @param lastFetchedAt ISO date string of when we last fetched this data from the API
  * @returns true if cache is fresh, false if expired
  */
-export function isCacheFresh(updatedAt: string | undefined): boolean {
-  if (!updatedAt) return false;
+export function isCacheFresh(lastFetchedAt: string | undefined): boolean {
+  if (!lastFetchedAt) return false;
 
-  const lastUpdate = new Date(updatedAt).getTime();
+  const lastFetch = new Date(lastFetchedAt).getTime();
   const now = Date.now();
-  const age = now - lastUpdate;
+  const age = now - lastFetch;
 
   return age < CACHE_TTL;
 }
@@ -19,15 +19,15 @@ export function isCacheFresh(updatedAt: string | undefined): boolean {
 /**
  * Check if any item in an array has fresh cache
  */
-export function hasAnyCacheFresh(items: Array<{ updatedAt: string }>): boolean {
+export function hasAnyCacheFresh(items: Array<{ lastFetchedAt: string }>): boolean {
   if (items.length === 0) return false;
 
-  // Check the most recent item
+  // Check the most recently fetched item
   const mostRecent = items.reduce((latest, item) => {
-    const latestTime = new Date(latest.updatedAt).getTime();
-    const itemTime = new Date(item.updatedAt).getTime();
+    const latestTime = new Date(latest.lastFetchedAt).getTime();
+    const itemTime = new Date(item.lastFetchedAt).getTime();
     return itemTime > latestTime ? item : latest;
   });
 
-  return isCacheFresh(mostRecent.updatedAt);
+  return isCacheFresh(mostRecent.lastFetchedAt);
 }

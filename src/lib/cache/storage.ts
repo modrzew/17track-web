@@ -156,7 +156,8 @@ class PackageStorage {
       getRequest.onsuccess = () => {
         const existing = getRequest.result;
         if (existing) {
-          const updated = { ...existing, ...updates, updatedAt: new Date().toISOString() };
+          // Don't overwrite timestamps when updating user fields
+          const updated = { ...existing, ...updates };
           const putRequest = store.put(updated);
 
           putRequest.onsuccess = () => resolve();
@@ -185,7 +186,8 @@ class PackageStorage {
       getRequest.onsuccess = () => {
         const existing = getRequest.result;
         if (existing) {
-          const updated = { ...existing, ...updates, updatedAt: new Date().toISOString() };
+          // Don't overwrite timestamps when updating user fields
+          const updated = { ...existing, ...updates };
           const putRequest = store.put(updated);
 
           putRequest.onsuccess = () => resolve();
