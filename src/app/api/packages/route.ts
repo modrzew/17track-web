@@ -48,7 +48,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { number, carrier, tag } = body;
+    const {
+      number,
+      carrier,
+      tag,
+      // Custom fields for carriers that require additional info
+      destination_postal_code,
+      origin_postal_code,
+      ship_date,
+      destination_country,
+      origin_country,
+    } = body;
 
     if (!number || !carrier) {
       return NextResponse.json(
@@ -57,19 +67,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build tracking object with optional custom fields
+    const trackingData: Record<string, unknown> = {
+      number,
+      carrier,
+    };
+
+    // Add optional fields only if they have values
+    if (tag) trackingData.tag = tag;
+    if (destination_postal_code) trackingData.destination_postal_code = destination_postal_code;
+    if (origin_postal_code) trackingData.origin_postal_code = origin_postal_code;
+    if (ship_date) trackingData.ship_date = ship_date;
+    if (destination_country) trackingData.destination_country = destination_country;
+    if (origin_country) trackingData.origin_country = origin_country;
+
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         '17token': API_TOKEN || '',
       },
-      body: JSON.stringify([
-        {
-          number,
-          carrier,
-          tag,
-        },
-      ]),
+      body: JSON.stringify([trackingData]),
     });
 
     if (!response.ok) {

@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCarriers } from '@/hooks/useCarriers';
-import type { Carrier } from '@/lib/types';
+import type { Carrier, TrackingCustomFields } from '@/lib/types';
+import { getCarrierCustomFields, type CustomFieldDefinition } from '@/lib/carrierFields';
 import { XIcon, SearchIcon, SpinnerIcon } from './icons';
+
+// Convert YYYYMMDD to YYYY-MM-DD for date input
+function formatDateForInput(dateStr: string): string {
+  if (dateStr.length !== 8) return '';
+  return `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
+}
 
 interface AddPackageDialogProps {
   onClose: () => void;
-  onAdd: (trackingNumber: string, carrierCode: number, title?: string) => Promise<void>;
+  onAdd: (
+    trackingNumber: string,
+    carrierCode: number,
+    title?: string,
+    customFields?: TrackingCustomFields
+  ) => Promise<void>;
 }
 
 export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
@@ -17,23 +29,65 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
   const [showCarrierSearch, setShowCarrierSearch] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customFieldValues, setCustomFieldValues] = useState<TrackingCustomFields>({});
+  const [carrierFields, setCarrierFields] = useState<CustomFieldDefinition[]>([]);
 
   const searchResults = carrierSearch ? searchCarriers(carrierSearch).slice(0, 20) : [];
+
+  // Update carrier fields when carrier is selected
+  useEffect(() => {
+    if (selectedCarrier) {
+      const fields = getCarrierCustomFields(selectedCarrier.key);
+      setCarrierFields(fields);
+      // Reset custom field values when carrier changes
+      setCustomFieldValues({});
+    } else {
+      setCarrierFields([]);
+      setCustomFieldValues({});
+    }
+  }, [selectedCarrier]);
+
+  const handleCustomFieldChange = (fieldName: string, value: string) => {
+    setCustomFieldValues(prev => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  const areRequiredFieldsFilled = () => {
+    return carrierFields
+      .filter(field => field.required)
+      .every(field => {
+        const value = customFieldValues[field.name as keyof TrackingCustomFields];
+        return value && value.trim() !== '';
+      });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim() || !selectedCarrier) return;
+    if (!areRequiredFieldsFilled()) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      await onAdd(trackingNumber.trim(), selectedCarrier.key, title.trim() || undefined);
+      // Only pass custom fields if there are values
+      const hasCustomFields = Object.keys(customFieldValues).length > 0;
+      await onAdd(
+        trackingNumber.trim(),
+        selectedCarrier.key,
+        title.trim() || undefined,
+        hasCustomFields ? customFieldValues : undefined
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
       setLoading(false);
     }
   };
+
+  const canSubmit =
+    trackingNumber.trim() && selectedCarrier && areRequiredFieldsFilled() && !loading;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -170,6 +224,59 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
               )}
             </div>
 
+            {/* Custom Fields for selected carrier */}
+            {carrierFields.length > 0 && (
+              <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm font-medium text-gray-700">
+                  Additional information required for {selectedCarrier?._name}
+                </p>
+                {carrierFields.map(field => (
+                  <div key={field.name}>
+                    <label
+                      htmlFor={field.name}
+                      className="block text-sm font-medium text-gray-900 mb-1"
+                    >
+                      {field.label}
+                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {field.type === 'date' ? (
+                      <input
+                        id={field.name}
+                        type="date"
+                        value={
+                          customFieldValues[field.name as keyof TrackingCustomFields]
+                            ? formatDateForInput(
+                                customFieldValues[field.name as keyof TrackingCustomFields]!
+                              )
+                            : ''
+                        }
+                        onChange={e => {
+                          // Convert from YYYY-MM-DD to YYYYMMDD
+                          const value = e.target.value.replace(/-/g, '');
+                          handleCustomFieldChange(field.name, value);
+                        }}
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        required={field.required}
+                      />
+                    ) : (
+                      <input
+                        id={field.name}
+                        type="text"
+                        value={customFieldValues[field.name as keyof TrackingCustomFields] || ''}
+                        onChange={e => handleCustomFieldChange(field.name, e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder={field.placeholder}
+                        required={field.required}
+                      />
+                    )}
+                    {field.helpText && (
+                      <p className="mt-1 text-xs text-gray-500">{field.helpText}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600">{error}</p>
@@ -190,7 +297,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!trackingNumber.trim() || !selectedCarrier || loading}
+            disabled={!canSubmit}
             className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading && <SpinnerIcon className="w-4 h-4 animate-spin" />}

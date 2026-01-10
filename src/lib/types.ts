@@ -88,12 +88,27 @@ export interface PackageDetails extends Package {
   trackingHistory: TrackingEvent[];
 }
 
+// Custom fields that can be passed when registering a tracking
+export interface TrackingCustomFields {
+  destination_postal_code?: string;
+  origin_postal_code?: string;
+  ship_date?: string; // Format: YYYYMMDD
+  destination_country?: string; // ISO 2-letter code
+  origin_country?: string; // ISO 2-letter code
+}
+
 // API Request types
 export interface RegisterTrackingRequest {
   number: string;
   carrier: number;
   tag?: string; // User-defined title
   auto_detection?: 0 | 1; // Auto-detect carrier
+  // Custom fields for carriers that require additional info
+  destination_postal_code?: string;
+  origin_postal_code?: string;
+  ship_date?: string;
+  destination_country?: string;
+  origin_country?: string;
 }
 
 export interface GetTrackListRequest {

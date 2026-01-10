@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Package } from '@/lib/types';
+import type { Package, TrackingCustomFields } from '@/lib/types';
 import { track17Api, Track17Api, Track17ApiError } from '@/lib/api/track17';
 import { packageStorage } from '@/lib/cache/storage';
 import { hasAnyCacheFresh } from '@/lib/cache/ttl';
@@ -80,7 +80,12 @@ export function usePackages() {
   }, [loadPackages]);
 
   const addPackage = useCallback(
-    async (trackingNumber: string, carrierCode: number, title?: string) => {
+    async (
+      trackingNumber: string,
+      carrierCode: number,
+      title?: string,
+      customFields?: TrackingCustomFields
+    ) => {
       try {
         setError(null);
 
@@ -89,6 +94,7 @@ export function usePackages() {
           number: trackingNumber,
           carrier: carrierCode,
           tag: title,
+          ...customFields,
         });
 
         if (response.rejected.length > 0) {
