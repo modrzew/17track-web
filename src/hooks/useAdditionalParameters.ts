@@ -13,9 +13,9 @@ export function useAdditionalParameters(
   const carrierParams = useMemo(() => {
     if (carrierKey === null) return undefined;
 
-    const params = (
-      additionalParametersData as CarrierAdditionalParameters[]
-    ).find((carrier) => carrier.key === carrierKey);
+    const params = (additionalParametersData as CarrierAdditionalParameters[]).find(
+      carrier => carrier.key === carrierKey
+    );
 
     return params;
   }, [carrierKey]);
@@ -28,9 +28,7 @@ export function useAdditionalParameters(
  * @param carrierKey - The carrier key/ID to check
  * @returns true if the carrier has required parameters
  */
-export function useHasRequiredParameters(
-  carrierKey: number | null
-): boolean {
+export function useHasRequiredParameters(carrierKey: number | null): boolean {
   const params = useAdditionalParameters(carrierKey);
-  return params?.parameters.some((p) => p.require) ?? false;
+  return params?.parameters.some(p => p.require) ?? false;
 }

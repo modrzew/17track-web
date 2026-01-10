@@ -4,7 +4,6 @@ import { useAdditionalParameters } from '@/hooks/useAdditionalParameters';
 import type { Carrier } from '@/lib/types';
 import { XIcon, SearchIcon, SpinnerIcon } from './icons';
 
-
 interface AddPackageDialogProps {
   onClose: () => void;
   onAdd: (
@@ -44,8 +43,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
     // Validate required custom parameters
     if (additionalParams) {
       const missingParams = additionalParams.parameters
-        .filter((param) => param.require && !customParams[param.paramKey]?.trim())
-        .map((param) => param.description);
+        .filter(param => param.require && !customParams[param.paramKey]?.trim())
+        .map(param => param.description);
 
       if (missingParams.length > 0) {
         setError(`Please fill in required fields: ${missingParams.join(', ')}`);
@@ -57,14 +56,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
     setError(null);
 
     try {
-      const params =
-        Object.keys(customParams).length > 0 ? customParams : undefined;
-      await onAdd(
-        trackingNumber.trim(),
-        selectedCarrier.key,
-        title.trim() || undefined,
-        params
-      );
+      const params = Object.keys(customParams).length > 0 ? customParams : undefined;
+      await onAdd(trackingNumber.trim(), selectedCarrier.key, title.trim() || undefined, params);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
       setLoading(false);
@@ -208,7 +201,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 <p className="text-sm font-medium text-gray-900">
                   Additional Information for {selectedCarrier._name}
                 </p>
-                {additionalParams.parameters.map((param) => (
+                {additionalParams.parameters.map(param => (
                   <div key={param.paramKey}>
                     <label
                       htmlFor={param.paramKey}
@@ -221,8 +214,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                       <select
                         id={param.paramKey}
                         value={customParams[param.paramKey] || ''}
-                        onChange={(e) =>
-                          setCustomParams((prev) => ({
+                        onChange={e =>
+                          setCustomParams(prev => ({
                             ...prev,
                             [param.paramKey]: e.target.value,
                           }))
@@ -242,8 +235,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                         id={param.paramKey}
                         type="text"
                         value={customParams[param.paramKey] || ''}
-                        onChange={(e) =>
-                          setCustomParams((prev) => ({
+                        onChange={e =>
+                          setCustomParams(prev => ({
                             ...prev,
                             [param.paramKey]: e.target.value,
                           }))
