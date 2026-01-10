@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { number, carrier, tag } = body;
+    const { number, carrier, tag, parameter } = body;
 
     if (!number || !carrier) {
       return NextResponse.json(
@@ -57,19 +57,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const requestBody: {
+      number: string;
+      carrier: number;
+      tag?: string;
+      parameter?: Record<string, string>;
+    } = {
+      number,
+      carrier,
+      tag,
+    };
+
+    // Only include parameter if it exists and is not empty
+    if (parameter && Object.keys(parameter).length > 0) {
+      requestBody.parameter = parameter;
+    }
+
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         '17token': API_TOKEN || '',
       },
-      body: JSON.stringify([
-        {
-          number,
-          carrier,
-          tag,
-        },
-      ]),
+      body: JSON.stringify([requestBody]),
     });
 
     if (!response.ok) {

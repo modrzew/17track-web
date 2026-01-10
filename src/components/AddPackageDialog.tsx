@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { useCarriers } from '@/hooks/useCarriers';
+import { useAdditionalParameters } from '@/hooks/useAdditionalParameters';
 import type { Carrier } from '@/lib/types';
 import { XIcon, SearchIcon, SpinnerIcon } from './icons';
 
 interface AddPackageDialogProps {
   onClose: () => void;
-  onAdd: (trackingNumber: string, carrierCode: number, title?: string) => Promise<void>;
+  onAdd: (
+    trackingNumber: string,
+    carrierCode: number,
+    title?: string,
+    customParams?: Record<string, string>
+  ) => Promise<void>;
 }
 
 export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
@@ -17,18 +23,47 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
   const [showCarrierSearch, setShowCarrierSearch] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customParams, setCustomParams] = useState<Record<string, string>>({});
+
+  const additionalParams = useAdditionalParameters(selectedCarrier?.key ?? null);
 
   const searchResults = carrierSearch ? searchCarriers(carrierSearch).slice(0, 20) : [];
+
+  const handleSelectCarrier = (carrier: Carrier) => {
+    setSelectedCarrier(carrier);
+    setCustomParams({});
+    setShowCarrierSearch(false);
+    setCarrierSearch('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim() || !selectedCarrier) return;
 
+    // Validate required custom parameters
+    if (additionalParams) {
+      const missingParams = additionalParams.parameters
+        .filter((param) => param.require && !customParams[param.paramKey]?.trim())
+        .map((param) => param.description);
+
+      if (missingParams.length > 0) {
+        setError(`Please fill in required fields: ${missingParams.join(', ')}`);
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      await onAdd(trackingNumber.trim(), selectedCarrier.key, title.trim() || undefined);
+      const params =
+        Object.keys(customParams).length > 0 ? customParams : undefined;
+      await onAdd(
+        trackingNumber.trim(),
+        selectedCarrier.key,
+        title.trim() || undefined,
+        params
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
       setLoading(false);
@@ -122,11 +157,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                         <button
                           key={carrier.key}
                           type="button"
-                          onClick={() => {
-                            setSelectedCarrier(carrier);
-                            setShowCarrierSearch(false);
-                            setCarrierSearch('');
-                          }}
+                          onClick={() => handleSelectCarrier(carrier)}
                           className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         >
                           <p className="text-sm font-medium text-gray-900">{carrier._name}</p>
@@ -151,7 +182,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                       <button
                         key={carrier.key}
                         type="button"
-                        onClick={() => setSelectedCarrier(carrier)}
+                        onClick={() => handleSelectCarrier(carrier)}
                         className="text-left px-3 py-2 border border-gray-200 rounded-lg hover:border-gray-900 hover:bg-gray-50"
                       >
                         <p className="text-sm font-medium text-gray-900">{carrier._name}</p>
@@ -169,6 +200,62 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
                 </div>
               )}
             </div>
+
+            {/* Additional Custom Fields */}
+            {selectedCarrier && additionalParams && additionalParams.parameters.length > 0 && (
+              <div className="space-y-4 pt-2">
+                <p className="text-sm font-medium text-gray-900">
+                  Additional Information for {selectedCarrier._name}
+                </p>
+                {additionalParams.parameters.map((param) => (
+                  <div key={param.paramKey}>
+                    <label
+                      htmlFor={param.paramKey}
+                      className="block text-sm font-medium text-gray-900 mb-1"
+                    >
+                      {param.description}
+                      {param.require && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {param.options ? (
+                      <select
+                        id={param.paramKey}
+                        value={customParams[param.paramKey] || ''}
+                        onChange={(e) =>
+                          setCustomParams((prev) => ({
+                            ...prev,
+                            [param.paramKey]: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        required={param.require}
+                      >
+                        <option value="">Select {param.description}</option>
+                        {Object.entries(param.options).map(([key, label]) => (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={param.paramKey}
+                        type="text"
+                        value={customParams[param.paramKey] || ''}
+                        onChange={(e) =>
+                          setCustomParams((prev) => ({
+                            ...prev,
+                            [param.paramKey]: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder={param.sample}
+                        required={param.require}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">

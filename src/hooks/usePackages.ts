@@ -80,7 +80,12 @@ export function usePackages() {
   }, [loadPackages]);
 
   const addPackage = useCallback(
-    async (trackingNumber: string, carrierCode: number, title?: string) => {
+    async (
+      trackingNumber: string,
+      carrierCode: number,
+      title?: string,
+      customParams?: Record<string, string>
+    ) => {
       try {
         setError(null);
 
@@ -89,6 +94,7 @@ export function usePackages() {
           number: trackingNumber,
           carrier: carrierCode,
           tag: title,
+          parameter: customParams,
         });
 
         if (response.rejected.length > 0) {

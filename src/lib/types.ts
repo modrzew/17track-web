@@ -11,6 +11,21 @@ export interface Carrier {
   _name_zh_hk?: string;
 }
 
+// Additional parameters for carriers
+export interface AdditionalParameter {
+  paramKey: string;
+  description: string;
+  options: Record<string, string> | null;
+  sample: string;
+  require: boolean;
+}
+
+export interface CarrierAdditionalParameters {
+  key: number;
+  name: string;
+  parameters: AdditionalParameter[];
+}
+
 // Package status enum
 export enum PackageStatus {
   NotFound = 0,
@@ -94,6 +109,7 @@ export interface RegisterTrackingRequest {
   carrier: number;
   tag?: string; // User-defined title
   auto_detection?: 0 | 1; // Auto-detect carrier
+  parameter?: Record<string, string>; // Additional custom fields for specific carriers
 }
 
 export interface GetTrackListRequest {
