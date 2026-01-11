@@ -33,6 +33,14 @@ npm run format
 npm run format:check
 ```
 
+## Before Committing
+
+Always run formatting and linting before committing changes:
+
+```bash
+npm run format && npm run lint && npm run type-check
+```
+
 ## Docker
 
 ```bash
@@ -137,6 +145,7 @@ Example: `import { usePackages } from '@/hooks/usePackages';`
 
 ## Important Implementation Notes
 
+- **Pre-commit checks**: Always run `npm run format && npm run lint && npm run type-check` before committing
 - **Turbopack**: All build commands use `--turbopack` flag
 - **Strict TypeScript**: `strict: true` in tsconfig.json - all code must be properly typed
 - **IndexedDB**: Only available client-side; check `typeof window !== 'undefined'`
