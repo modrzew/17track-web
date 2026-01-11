@@ -84,8 +84,7 @@ export function usePackages() {
       trackingNumber: string,
       carrierCode: number,
       title?: string,
-      additionalParams?: AdditionalParamValues,
-      additionalParamKeys?: string[]
+      additionalParams?: AdditionalParamValues
     ) => {
       try {
         setError(null);
@@ -95,7 +94,6 @@ export function usePackages() {
           number: trackingNumber,
           carrier: carrierCode,
           tag: title,
-          additionalParamKeys,
           ...additionalParams,
         });
 

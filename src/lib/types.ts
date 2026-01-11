@@ -118,9 +118,8 @@ export interface RegisterTrackingRequest {
   carrier: number;
   tag?: string; // User-defined title
   auto_detection?: 0 | 1; // Auto-detect carrier
-  additionalParamKeys?: string[]; // Ordered list of parameter keys (used to build the "param" field)
   // Additional carrier-specific parameters (e.g., postal_code, phone_number_last_4, destination_country)
-  [key: string]: string | number | string[] | undefined;
+  [key: string]: string | number | undefined;
 }
 
 export interface GetTrackListRequest {

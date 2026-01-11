@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { number, carrier, tag, additionalParamKeys, ...additionalParams } = body;
+    const { number, carrier, tag, ...additionalParams } = body;
 
     if (!number || !carrier) {
       return NextResponse.json(
@@ -68,26 +68,37 @@ export async function POST(request: NextRequest) {
       registrationPayload.tag = tag;
     }
 
-    // 17Track API expects additional parameters to be combined into a single "param" field
-    // with values separated by "-" in the order specified by additionalParamKeys
-    // Example: For PostNL with destination_country="FR" and postal_code="1000AA"
-    // The param field should be: "FR-1000AA"
-    if (additionalParamKeys && Array.isArray(additionalParamKeys) && additionalParamKeys.length > 0) {
-      const paramValues: string[] = [];
-      for (const key of additionalParamKeys) {
-        const value = additionalParams[key];
-        if (value !== undefined && value !== '') {
-          paramValues.push(String(value));
+    // Include any additional carrier-specific parameters
+    // API v2.4 expects these as individual fields with specific naming conventions
+    const specialTrackingInfo: Record<string, string> = {};
+
+    Object.entries(additionalParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        // Map parameter keys to API field names
+        switch (key) {
+          case 'postal_code':
+            // postal_code in additional-params.json → destination_postal_code in API
+            registrationPayload.destination_postal_code = value;
+            break;
+          case 'number_type':
+          case 'parameter':
+            // These go into special_tracking_info object
+            specialTrackingInfo[key] = String(value);
+            break;
+          default:
+            // All other fields pass through as-is (destination_country, phone_number_last_4, etc.)
+            registrationPayload[key] = value;
+            break;
         }
       }
+    });
 
-      if (paramValues.length > 0) {
-        registrationPayload.param = paramValues.join('-');
-        console.log(`Combined ${additionalParamKeys.length} parameters into param field:`, registrationPayload.param);
-      }
+    // Add special_tracking_info if any special fields were provided
+    if (Object.keys(specialTrackingInfo).length > 0) {
+      registrationPayload.special_tracking_info = specialTrackingInfo;
     }
 
-    console.log('Registering package with payload:', JSON.stringify([registrationPayload]));
+    console.log('Registering package with payload:', JSON.stringify([registrationPayload], null, 2));
 
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/register`, {
       method: 'POST',
