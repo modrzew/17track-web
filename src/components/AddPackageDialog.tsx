@@ -10,7 +10,8 @@ interface AddPackageDialogProps {
     trackingNumber: string,
     carrierCode: number,
     title?: string,
-    additionalParams?: AdditionalParamValues
+    additionalParams?: AdditionalParamValues,
+    additionalParamKeys?: string[]
   ) => Promise<void>;
 }
 
@@ -56,9 +57,14 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
     try {
       // Only pass non-empty additional params
       const filledParams: AdditionalParamValues = {};
-      Object.entries(additionalParams).forEach(([key, value]) => {
-        if (value.trim()) {
-          filledParams[key] = value.trim();
+      const filledParamKeys: string[] = [];
+
+      // Preserve the order of parameters as defined in the carrier's parameter list
+      carrierParams.forEach(param => {
+        const value = additionalParams[param.paramKey];
+        if (value && value.trim()) {
+          filledParams[param.paramKey] = value.trim();
+          filledParamKeys.push(param.paramKey);
         }
       });
 
@@ -66,7 +72,8 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
         trackingNumber.trim(),
         selectedCarrier.key,
         title.trim() || undefined,
-        Object.keys(filledParams).length > 0 ? filledParams : undefined
+        Object.keys(filledParams).length > 0 ? filledParams : undefined,
+        filledParamKeys.length > 0 ? filledParamKeys : undefined
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
