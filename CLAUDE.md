@@ -10,11 +10,11 @@ This is a Next.js 15 web application for tracking parcels using the 17Track API.
 
 ```bash
 # Development server (uses Turbopack)
-# Note: Automatically downloads carriers.json before starting
+# Note: Automatically downloads carriers.json and additional_parameters.json before starting
 npm run dev
 
 # Production build
-# Note: Automatically downloads carriers.json before building
+# Note: Automatically downloads carriers.json and additional_parameters.json before building
 npm run build
 
 # Start production server
@@ -67,13 +67,16 @@ src/
 ├── hooks/                 # Custom React hooks
 │   ├── usePackages.ts    # Package list management
 │   ├── usePackageDetails.ts  # Individual package details
-│   └── useCarriers.ts    # Carrier data access
+│   ├── useCarriers.ts    # Carrier data access
+│   └── useAdditionalParameters.ts  # Carrier-specific custom fields
 ├── lib/
 │   ├── api/
 │   │   └── track17.ts    # 17Track API client (rate-limited)
 │   ├── cache/
 │   │   ├── storage.ts    # IndexedDB operations
 │   │   └── ttl.ts        # Cache freshness logic (30 min TTL)
+│   ├── carriers.json     # Carrier list (auto-downloaded)
+│   ├── additional_parameters.json  # Carrier custom field definitions (auto-downloaded)
 │   └── types.ts          # TypeScript type definitions
 ```
 
@@ -145,6 +148,12 @@ Example: `import { usePackages } from '@/hooks/usePackages';`
   - Auto-populated with 1000+ carriers via `scripts/download-carriers.js` during dev/build (predev/prebuild hooks)
   - Downloads from 17Track's CDN (configurable via `CARRIERS_URL` env var)
   - App gracefully handles empty carriers array (e.g., during CI or before first download)
+- **Additional parameters**: Managed via `src/lib/additional_parameters.json`
+  - Contains custom field definitions for 137+ carriers (e.g., postal_code, phone_number_last_4)
+  - Auto-populated via `scripts/download-additional-params.js` during dev/build (predev/prebuild hooks)
+  - Downloads from 17Track's CDN
+  - AddPackageDialog dynamically renders required fields based on selected carrier
+  - Required fields are validated before submission to prevent API errors
 - **React 19**: Uses latest React features; ensure compatibility when adding dependencies
 - **Standalone build**: `output: 'standalone'` in next.config.ts for optimal Docker images
 
