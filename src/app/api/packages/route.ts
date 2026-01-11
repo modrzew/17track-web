@@ -98,7 +98,10 @@ export async function POST(request: NextRequest) {
       registrationPayload.special_tracking_info = specialTrackingInfo;
     }
 
-    console.log('Registering package with payload:', JSON.stringify([registrationPayload], null, 2));
+    console.log(
+      'Registering package with payload:',
+      JSON.stringify([registrationPayload], null, 2)
+    );
 
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/register`, {
       method: 'POST',
