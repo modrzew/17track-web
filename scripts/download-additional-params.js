@@ -7,7 +7,6 @@ const https = require('https');
 const ADDITIONAL_PARAMS_URL =
   process.env.ADDITIONAL_PARAMS_URL ||
   'https://res.17track.net/asset/carrier/info/additional_parameters.json';
-const FALLBACK_URL = 'https://modriv.net/additional_parameters.json';
 const OUTPUT_PATH = path.join(__dirname, '..', 'src', 'lib', 'additional-params.json');
 
 function fetchUrl(url) {
@@ -48,13 +47,8 @@ async function main() {
   try {
     data = await fetchUrl(ADDITIONAL_PARAMS_URL);
   } catch (error) {
-    console.warn(`Primary URL failed (${error.message}), trying fallback...`);
-    try {
-      data = await fetchUrl(FALLBACK_URL);
-    } catch (fallbackError) {
-      console.error('Both URLs failed:', fallbackError.message);
-      process.exit(1);
-    }
+    console.error('Failed to download additional parameters:', error.message);
+    process.exit(1);
   }
 
   try {
