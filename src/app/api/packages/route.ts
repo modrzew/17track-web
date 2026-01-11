@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { number, carrier, tag } = body;
+    const { number, carrier, tag, ...additionalParams } = body;
 
     if (!number || !carrier) {
       return NextResponse.json(
@@ -57,19 +57,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build the registration payload with additional carrier-specific parameters
+    const registrationPayload: Record<string, unknown> = {
+      number,
+      carrier,
+    };
+
+    // Only include tag if provided
+    if (tag) {
+      registrationPayload.tag = tag;
+    }
+
+    // Include any additional carrier-specific parameters (e.g., postal_code, phone_number_last_4)
+    Object.entries(additionalParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        registrationPayload[key] = value;
+      }
+    });
+
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         '17token': API_TOKEN || '',
       },
-      body: JSON.stringify([
-        {
-          number,
-          carrier,
-          tag,
-        },
-      ]),
+      body: JSON.stringify([registrationPayload]),
     });
 
     if (!response.ok) {

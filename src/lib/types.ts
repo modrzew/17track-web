@@ -11,6 +11,30 @@ export interface Carrier {
   _name_zh_hk?: string;
 }
 
+// Carrier additional parameters (from additional_parameters.json)
+export interface CarrierParamOption {
+  [key: string]: string; // e.g., { "1": "AWB", "2": "Order Id" }
+}
+
+export interface CarrierParam {
+  paramKey: string; // e.g., "postal_code", "phone_number_last_4", "destination_country"
+  description: string; // Human-readable description
+  options: CarrierParamOption | null; // Dropdown options if applicable
+  sample: string; // Example value
+  require: boolean; // Whether this field is required
+}
+
+export interface CarrierAdditionalParams {
+  key: number; // Carrier key (matches Carrier.key)
+  name: string; // Carrier name
+  parameters: CarrierParam[];
+}
+
+// Additional parameters values when registering a package
+export interface AdditionalParamValues {
+  [paramKey: string]: string;
+}
+
 // Package status enum
 export enum PackageStatus {
   NotFound = 0,
@@ -94,6 +118,8 @@ export interface RegisterTrackingRequest {
   carrier: number;
   tag?: string; // User-defined title
   auto_detection?: 0 | 1; // Auto-detect carrier
+  // Additional carrier-specific parameters (e.g., postal_code, phone_number_last_4, destination_country)
+  [key: string]: string | number | undefined;
 }
 
 export interface GetTrackListRequest {
