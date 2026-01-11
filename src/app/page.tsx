@@ -159,8 +159,8 @@ export default function Home() {
       {showAddDialog && (
         <AddPackageDialog
           onClose={() => setShowAddDialog(false)}
-          onAdd={async (trackingNumber, carrierCode, title) => {
-            await addPackage(trackingNumber, carrierCode, title);
+          onAdd={async (trackingNumber, carrierCode, title, additionalParams) => {
+            await addPackage(trackingNumber, carrierCode, title, additionalParams);
             setShowAddDialog(false);
           }}
         />
