@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCarriers } from '@/hooks/useCarriers';
-import type { Carrier } from '@/lib/types';
+import { useCarrierParams } from '@/hooks/useCarrierParams';
+import type { Carrier, AdditionalParamValues } from '@/lib/types';
 import { XIcon, SearchIcon, SpinnerIcon } from './icons';
 
 interface AddPackageDialogProps {
   onClose: () => void;
-  onAdd: (trackingNumber: string, carrierCode: number, title?: string) => Promise<void>;
+  onAdd: (
+    trackingNumber: string,
+    carrierCode: number,
+    title?: string,
+    additionalParams?: AdditionalParamValues
+  ) => Promise<void>;
 }
 
 export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
   const { popularCarriers, searchCarriers } = useCarriers();
+  const { getParamsForCarrier, hasRequiredParams } = useCarrierParams();
   const [trackingNumber, setTrackingNumber] = useState('');
   const [title, setTitle] = useState('');
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
@@ -17,8 +24,27 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
   const [showCarrierSearch, setShowCarrierSearch] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [additionalParams, setAdditionalParams] = useState<AdditionalParamValues>({});
 
   const searchResults = carrierSearch ? searchCarriers(carrierSearch).slice(0, 20) : [];
+
+  // Get additional parameters for the selected carrier
+  const carrierParams = selectedCarrier ? getParamsForCarrier(selectedCarrier.key) : [];
+
+  // Reset additional params when carrier changes
+  useEffect(() => {
+    setAdditionalParams({});
+  }, [selectedCarrier?.key]);
+
+  // Check if all required fields are filled
+  const requiredParamsFilled = carrierParams
+    .filter(p => p.require)
+    .every(p => additionalParams[p.paramKey]?.trim());
+
+  const canSubmit =
+    trackingNumber.trim() &&
+    selectedCarrier &&
+    (!hasRequiredParams(selectedCarrier.key) || requiredParamsFilled);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,11 +54,44 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
     setError(null);
 
     try {
-      await onAdd(trackingNumber.trim(), selectedCarrier.key, title.trim() || undefined);
+      // Only pass non-empty additional params
+      const filledParams: AdditionalParamValues = {};
+      Object.entries(additionalParams).forEach(([key, value]) => {
+        if (value.trim()) {
+          filledParams[key] = value.trim();
+        }
+      });
+
+      await onAdd(
+        trackingNumber.trim(),
+        selectedCarrier.key,
+        title.trim() || undefined,
+        Object.keys(filledParams).length > 0 ? filledParams : undefined
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add package');
       setLoading(false);
     }
+  };
+
+  const handleParamChange = (paramKey: string, value: string) => {
+    setAdditionalParams(prev => ({
+      ...prev,
+      [paramKey]: value,
+    }));
+  };
+
+  // Format param key to human-readable label
+  const formatParamLabel = (paramKey: string, description: string): string => {
+    // Use description if it's meaningful, otherwise format the key
+    if (description && description !== paramKey && !description.includes('_')) {
+      return description.charAt(0).toUpperCase() + description.slice(1);
+    }
+    // Convert snake_case to Title Case
+    return paramKey
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   return (
@@ -170,6 +229,52 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
               )}
             </div>
 
+            {/* Additional Parameters */}
+            {selectedCarrier && carrierParams.length > 0 && (
+              <div className="space-y-4 pt-2 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-700">
+                  Additional fields for {selectedCarrier._name}
+                </p>
+                {carrierParams.map(param => (
+                  <div key={param.paramKey}>
+                    <label
+                      htmlFor={`param-${param.paramKey}`}
+                      className="block text-sm font-medium text-gray-900 mb-1"
+                    >
+                      {formatParamLabel(param.paramKey, param.description)}
+                      {param.require && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {param.options ? (
+                      <select
+                        id={`param-${param.paramKey}`}
+                        value={additionalParams[param.paramKey] || ''}
+                        onChange={e => handleParamChange(param.paramKey, e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        required={param.require}
+                      >
+                        <option value="">Select an option</option>
+                        {Object.entries(param.options).map(([key, label]) => (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={`param-${param.paramKey}`}
+                        type="text"
+                        value={additionalParams[param.paramKey] || ''}
+                        onChange={e => handleParamChange(param.paramKey, e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder={param.sample ? `e.g., ${param.sample}` : ''}
+                        required={param.require}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600">{error}</p>
@@ -190,7 +295,7 @@ export function AddPackageDialog({ onClose, onAdd }: AddPackageDialogProps) {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!trackingNumber.trim() || !selectedCarrier || loading}
+            disabled={!canSubmit || loading}
             className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading && <SpinnerIcon className="w-4 h-4 animate-spin" />}
