@@ -45,6 +45,12 @@ export async function PATCH(
     const { trackingNumber } = await params;
     const body = await request.json();
 
+    // Build the items object, only including tag if it's provided
+    const items: { tag?: string } = {};
+    if (body.tag !== undefined) {
+      items.tag = body.tag;
+    }
+
     const response = await fetch(`${API_BASE_URL}/track/${API_VERSION}/changeinfo`, {
       method: 'POST',
       headers: {
@@ -55,9 +61,7 @@ export async function PATCH(
         {
           number: trackingNumber,
           carrier: body.carrier,
-          items: {
-            tag: body.tag,
-          },
+          items,
         },
       ]),
     });

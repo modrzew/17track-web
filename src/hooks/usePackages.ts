@@ -188,8 +188,14 @@ export function usePackages() {
     try {
       setError(null);
 
-      // Update on 17Track API
-      await track17Api.changeCarrier(trackingNumber, carrierCode);
+      // Get the current package to preserve its title
+      const currentPackage = await packageStorage.getPackage(trackingNumber);
+      if (!currentPackage) {
+        throw new Error('Package not found');
+      }
+
+      // Update on 17Track API, preserving the existing title
+      await track17Api.changeCarrier(trackingNumber, carrierCode, currentPackage.title);
 
       // Update in both caches (list and details)
       await packageStorage.updatePackage(trackingNumber, { carrierCode });

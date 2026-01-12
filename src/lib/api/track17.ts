@@ -159,13 +159,18 @@ class Track17Api {
     return response.data;
   }
 
-  async changeCarrier(trackingNumber: string, newCarrierCode: number): Promise<ChangeInfoResponse> {
+  async changeCarrier(
+    trackingNumber: string,
+    newCarrierCode: number,
+    tag?: string
+  ): Promise<ChangeInfoResponse> {
     const response = await this.request<ChangeInfoResponse>(
       `/api/packages/${encodeURIComponent(trackingNumber)}`,
       {
         method: 'PATCH',
         body: JSON.stringify({
           carrier: newCarrierCode,
+          tag,
         }),
       }
     );
