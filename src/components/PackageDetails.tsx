@@ -9,7 +9,9 @@ import {
   PackageIcon,
   CopyIcon,
   SearchIcon,
+  ExternalLinkIcon,
 } from './icons';
+import { useCarrierTrackingUrl } from '@/hooks/useCarrierTrackingUrl';
 
 interface PackageDetailsProps {
   details: PackageDetailsType | null;
@@ -31,6 +33,7 @@ export function PackageDetails({
   onUpdateCarrier,
 }: PackageDetailsProps) {
   const { getCarrierById, popularCarriers, searchCarriers } = useCarriers();
+  const { getTrackingUrl } = useCarrierTrackingUrl();
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState('');
   const [copied, setCopied] = useState(false);
@@ -270,14 +273,31 @@ export function PackageDetails({
               )
             )}
           </div>
-          <button
-            onClick={onRefresh}
-            disabled={refreshing}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50 flex-shrink-0"
-            title="Refresh"
-          >
-            <RefreshIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {(() => {
+              const trackingUrl = getTrackingUrl(details.carrierCode, details.trackingNumber);
+              if (!trackingUrl) return null;
+              return (
+                <a
+                  href={trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+                  title="Track on carrier website"
+                >
+                  <ExternalLinkIcon className="w-5 h-5" />
+                </a>
+              );
+            })()}
+            <button
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
