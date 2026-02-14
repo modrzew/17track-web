@@ -11,7 +11,14 @@ const PAGE_SIZE = 40;
 interface TrackListItem {
   number: string;
   carrier: number;
-  package_status: string;
+  package_status:
+    | 'NotFound'
+    | 'InTransit'
+    | 'PickUp'
+    | 'Undelivered'
+    | 'Delivered'
+    | 'Alert'
+    | 'Expired';
   latest_event_time: string;
   latest_event_info: string;
   tag?: string | null;
