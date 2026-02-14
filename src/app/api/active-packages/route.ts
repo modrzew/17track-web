@@ -31,6 +31,11 @@ interface TrackListResponse {
   };
 }
 
+function normalizeTimestamp(timestamp: string): string {
+  const date = new Date(timestamp);
+  return isNaN(date.getTime()) ? timestamp : date.toISOString();
+}
+
 function buildCarrierMap(): Map<number, string> {
   const map = new Map<number, string>();
   for (const carrier of carriersData as Carrier[]) {
@@ -90,7 +95,7 @@ export async function GET() {
         name: item.tag ?? null,
         status: item.package_status,
         last_update: {
-          timestamp: item.latest_event_time || null,
+          timestamp: item.latest_event_time ? normalizeTimestamp(item.latest_event_time) : null,
           description: item.latest_event_info || null,
         },
       }));
